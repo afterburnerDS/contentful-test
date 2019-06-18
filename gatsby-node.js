@@ -1,96 +1,67 @@
-const path = require('path');
+const path = require("path");
 
 // Create pages from markdown files
 exports.createPages = ({ graphql, actions }) => {
   const { createPage } = actions;
+  const landingPageTemplate = path.resolve("./src/templates/landing-page.js");
   return new Promise((resolve, reject) => {
     resolve(
       graphql(
         `
-          query {
-            services: allMarkdownRemark(
-              filter: { fileAbsolutePath: { regex: "/services/" } }
-              sort: { fields: [frontmatter___date], order: DESC }
-            ) {
+          {
+            allContentfulLandingPage {
               edges {
                 node {
-                  id
-                  frontmatter {
-                    path
-                    title
-                    date(formatString: "DD MMMM YYYY")
-                  }
-                  excerpt
-                }
-              }
-            }
-            team: allMarkdownRemark(
-              filter: { fileAbsolutePath: { regex: "/team/" } }
-              sort: { fields: [frontmatter___date], order: DESC }
-            ) {
-              edges {
-                node {
-                  id
-                  frontmatter {
-                    path
-                    title
-                    date(formatString: "DD MMMM YYYY")
-                  }
-                  excerpt
-                }
-              }
-            }
-            testimonials: allMarkdownRemark(
-              filter: { fileAbsolutePath: { regex: "/testimonials/" } }
-              sort: { fields: [frontmatter___date], order: DESC }
-            ) {
-              edges {
-                node {
-                  id
-                  frontmatter {
-                    path
-                    title
-                    date(formatString: "DD MMMM YYYY")
-                  }
-                  excerpt
+                  slug
+                  title
                 }
               }
             }
           }
-        `,
-      ).then((result) => {
-        result.data.services.edges.forEach(({ node }) => {
-          const component = path.resolve('src/templates/service.js');
+        `
+      ).then(result => {
+        /* result.data.services.edges.forEach(({ node }) => {
+          const component = path.resolve("src/templates/service.js");
           createPage({
             path: node.frontmatter.path,
             component,
             context: {
-              id: node.id,
-            },
+              id: node.id
+            }
           });
         });
         result.data.team.edges.forEach(({ node }) => {
-          const component = path.resolve('src/templates/team.js');
+          const component = path.resolve("src/templates/team.js");
           createPage({
             path: node.frontmatter.path,
             component,
             context: {
-              id: node.id,
-            },
+              id: node.id
+            }
           });
         });
         result.data.testimonials.edges.forEach(({ node }) => {
-          const component = path.resolve('src/templates/testimonial.js');
+          const component = path.resolve("src/templates/testimonial.js");
           createPage({
             path: node.frontmatter.path,
             component,
             context: {
-              id: node.id,
-            },
+              id: node.id
+            }
+          });
+        }); */
+        const landingPage = result.data.allContentfulLandingPage.edges;
+        landingPage.forEach((page, index) => {
+          createPage({
+            path: page.node.slug,
+            component: landingPageTemplate,
+            context: {
+              slug: page.node.slug
+            }
           });
         });
         resolve();
-      }),
+      })
     );
   });
 };
